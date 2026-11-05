@@ -32,6 +32,7 @@ public class CharacterSelectionMenu : MonoBehaviour
 
     void Start()
     {
+        InitializeCharacterUnlocks();
         ShowCharacter(GetCurrCharIndex());
         UpdateCountAmount();
     }
@@ -85,7 +86,7 @@ public class CharacterSelectionMenu : MonoBehaviour
             selectBtn.interactable = false;
             selectBtnText.text = "SELECTED";
         }
-        else if (isCharAvailable(charData.characterData[currChar].charName))
+        else if (isCharAvailable(currChar))
         {
             selectBtn.interactable = true;
             selectBtnText.text = "SELECT";
@@ -145,7 +146,7 @@ public class CharacterSelectionMenu : MonoBehaviour
 
     public void SelectChar()
     {
-        if (!isCharAvailable(charData.characterData[currChar].charName))
+        if (!isCharAvailable(currChar))
         {
             int price = GetCharUnlockPrice(currChar);
             int coins = PlayerPrefs.GetInt("Foods", 0);
@@ -153,6 +154,8 @@ public class CharacterSelectionMenu : MonoBehaviour
             {
                 coins -= price;
                 PlayerPrefs.SetInt("Foods", coins);
+                PlayerPrefs.SetInt(GetCharacterUnlockKey(currChar), 1);
+                PlayerPrefs.Save();
             }
             else
             {
@@ -163,29 +166,33 @@ public class CharacterSelectionMenu : MonoBehaviour
         PlayerPrefs.SetInt("Character", currChar);
         
         SetSelectBtnInteractivity();
-        
         SetCharData();
+        UpdateCountAmount();
     }
     
-    private bool isCharAvailable(CharacterName characterName)
+    private bool isCharAvailable(int charIndex)
     {
-        int charIndex = charData.characterData.FindIndex( data => data.charName == characterName);
-
-        int lvl = GetCharUnlockLvl(charIndex);
-
-        int coin = PlayerPrefs.GetInt("Foods", 0);
-
-        if (lvl <= LevelManager.Instance.GetLatestUnlockedLevelNo() + 1)
-        {
-            return true;
-        }
-        
-        return false;
+        return PlayerPrefs.GetInt(GetCharacterUnlockKey(charIndex), 0) == 1;
     }
 
-    private int GetCharUnlockLvl(int charIndex)
+    private void InitializeCharacterUnlocks()
     {
-        return (int)charData.characterData[charIndex].unlocksAtLvl;
+        int selectedCharacter = GetCurrCharIndex();
+        for (int i = 0; i < charData.characterData.Count; i++)
+        {
+            string unlockKey = GetCharacterUnlockKey(i);
+            if (!PlayerPrefs.HasKey(unlockKey) && (i == 0 || i == selectedCharacter))
+            {
+                PlayerPrefs.SetInt(unlockKey, 1);
+            }
+        }
+
+        PlayerPrefs.Save();
+    }
+
+    private string GetCharacterUnlockKey(int charIndex)
+    {
+        return $"CharacterUnlocked_{charData.characterData[charIndex].charName}";
     }
 
     private int GetCharUnlockPrice(int charIndex)

@@ -901,6 +901,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: LevelManager
       objectReference: {fileID: 0}
+    - target: {fileID: 4386507222405645530, guid: 70bbd1ab00921704fa8d1c0939732e21, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 9169647595489560583, guid: 70bbd1ab00921704fa8d1c0939732e21, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -6343,6 +6347,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: AudioManager
       objectReference: {fileID: 0}
+    - target: {fileID: 6384297274746208630, guid: 47ef757a7a663e045800bb49f6413cb5, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -7619,6 +7627,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4413329744241210803, guid: c670a99b6ad8efe439192788e63e20cf, type: 3}
   m_PrefabInstance: {fileID: 1454130000}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1462423012 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3091560189860416946, guid: 741469164a2c18446a3007ba806366bc, type: 3}
+  m_PrefabInstance: {fileID: 1369474583}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f9054920514a01448f5910ababb4446, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HUDMenu
 --- !u!4 &1471159161 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4041754495263292866, guid: 937a5daa29f6d1344b7733679e214005, type: 3}
@@ -51582,6 +51601,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8071217704389422081, guid: 58ee50092a6bca74a9a9cf3960f41d57, type: 3}
+      propertyPath: hudMenu
+      value: 
+      objectReference: {fileID: 1462423012}
     - target: {fileID: 8071217704389422081, guid: 58ee50092a6bca74a9a9cf3960f41d57, type: 3}
       propertyPath: checkpointManager
       value: 
