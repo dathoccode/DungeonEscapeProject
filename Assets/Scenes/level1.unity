@@ -573,7 +573,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6384297274746208630, guid: 47ef757a7a663e045800bb49f6413cb5, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1934,7 +1934,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4386507222405645530, guid: 70bbd1ab00921704fa8d1c0939732e21, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 9169647595489560583, guid: 70bbd1ab00921704fa8d1c0939732e21, type: 3}
       propertyPath: m_LocalPosition.x
@@ -2057,6 +2057,14 @@ PrefabInstance:
       propertyPath: gameOverMenu
       value: 
       objectReference: {fileID: 8458057521605798272}
+    - target: {fileID: 7074810212961939118, guid: 0cc793c5610de314e9a3e2ade3e8d937, type: 3}
+      propertyPath: initSpawnPos.x
+      value: -9.41
+      objectReference: {fileID: 0}
+    - target: {fileID: 7074810212961939118, guid: 0cc793c5610de314e9a3e2ade3e8d937, type: 3}
+      propertyPath: initSpawnPos.y
+      value: 4.61
+      objectReference: {fileID: 0}
     - target: {fileID: 7074810212961939118, guid: 0cc793c5610de314e9a3e2ade3e8d937, type: 3}
       propertyPath: checkpointManager
       value: 
@@ -39184,11 +39192,11 @@ PrefabInstance:
       objectReference: {fileID: 1054332644}
     - target: {fileID: 4610883042436760411, guid: 5b22ddfaf9c13c14fa5fd8dc105283ef, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.4511484
+      value: -0.5469664
       objectReference: {fileID: 0}
     - target: {fileID: 4610883042436760411, guid: 5b22ddfaf9c13c14fa5fd8dc105283ef, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1.5568
+      value: 1.5583099
       objectReference: {fileID: 0}
     - target: {fileID: 7383620899152253492, guid: 5b22ddfaf9c13c14fa5fd8dc105283ef, type: 3}
       propertyPath: m_Name

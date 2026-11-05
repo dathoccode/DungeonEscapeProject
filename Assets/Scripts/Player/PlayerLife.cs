@@ -63,7 +63,7 @@ public class PlayerLife : MonoBehaviour
         CameraShaker.Instance.ShakeCamera(5f, 0.25f);
         AudioManager.Instance.PlaySound(AudioType.characterDeath);
         animator.SetTrigger(deathAnim);
-
+        rb.bodyType = RigidbodyType2D.Static;
         LoseLife();
     }
 
@@ -73,7 +73,6 @@ public class PlayerLife : MonoBehaviour
         {
             LifeCount--;
         }
-        
         PlayerPrefs.SetInt("LifeCount", LifeCount);
     }
 
@@ -93,6 +92,7 @@ public class PlayerLife : MonoBehaviour
         {
             AudioManager.Instance.PlaySound(AudioType.itemCollect);
             LifeCount++;
+            PlayerPrefs.SetInt("LifeCount", LifeCount);
             UpdateHeartsCountsUI();
             Destroy(collision.gameObject);
         }
@@ -135,7 +135,7 @@ public class PlayerLife : MonoBehaviour
     {
         boxCollider.enabled = true;
         playerMovement.Flip(true);
-        
+        rb.bodyType = RigidbodyType2D.Dynamic;
         if (checkpointManager.hasPassedAnyCheckPoints())
         {
             Vector3 pos = checkpointManager.GetLatestCheckPoint().position;
