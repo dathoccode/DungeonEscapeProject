@@ -12,7 +12,7 @@ public class CheckpointManager : MonoBehaviour
         if (CheckPoints == null)
             CheckPoints = GetComponentsInChildren<Transform>();
         
-        latestCheckpointIndex = PlayerPrefs.GetInt("LatestCheckpointIndex", 0);
+        latestCheckpointIndex = 0;
     }
 
     public void SetLatestCheckpoint(Transform point)
