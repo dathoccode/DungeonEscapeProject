@@ -7,6 +7,7 @@ public class Finish : MonoBehaviour
     
     [Header("Manager Refs")]
     [SerializeField] private CheckpointManager checkpointManager;
+    [SerializeField] private LevelTimer levelTimer;
 
     [Header("Level Completion")]
     [SerializeField] private HUDMenu hudMenu;
@@ -21,6 +22,9 @@ public class Finish : MonoBehaviour
 
         if (checkpointManager == null)
             checkpointManager = FindFirstObjectByType<CheckpointManager>();
+
+        if (levelTimer == null)
+            levelTimer = FindFirstObjectByType<LevelTimer>();
     }
 
     void OnTriggerEnter2D(Collider2D collision)
@@ -34,7 +38,16 @@ public class Finish : MonoBehaviour
             }
             animator.SetTrigger(onCompleteAnim);
             AudioManager.Instance.PlaySound(AudioType.levelFinish);
-            hudMenu.ShowMessage("Congratulation for completing the level!");
+
+            if (levelTimer != null)
+            {
+                levelTimer.StopTimer(saveBestTime: true);
+                hudMenu.ShowMessage($"Congratulation for completing the level! ({levelTimer.GetFormattedTime()})");
+            }
+            else
+            {
+                hudMenu.ShowMessage("Congratulation for completing the level!");
+            }
 
             checkpointManager.ClearCheckpoints();
             

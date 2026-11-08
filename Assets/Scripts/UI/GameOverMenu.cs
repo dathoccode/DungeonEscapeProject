@@ -6,15 +6,22 @@ public class GameOverMenu : MonoBehaviour
     [SerializeField] private Canvas gameOverCanvas;
     [SerializeField] private GameObject mainPanel;
     [SerializeField] private GameObject startLevelAgainBtn;
+    [SerializeField] private LevelTimer levelTimer;
 
     private void Awake()
     {
         if (gameOverCanvas == null)
             gameOverCanvas = GetComponent<Canvas>();
+
+        if (levelTimer == null)
+            levelTimer = FindFirstObjectByType<LevelTimer>();
     }
 
     public void OpenGameOverMenu()
     {
+        if (levelTimer != null)
+            levelTimer.StopTimer();
+
         gameOverCanvas.enabled = true;
         SetTimeScale(false);
 
