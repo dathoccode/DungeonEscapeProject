@@ -50,7 +50,8 @@ public class PlayerLife : MonoBehaviour
         int initLifeCnt = charData.playerLifeData.InitLifeCount;
         LifeCount = PlayerPrefs.GetInt("LifeCount", initLifeCnt);
         PlayerPrefs.SetInt("LifeCount", LifeCount);
-        
+
+        initSpawnPos = transform.position;
         maxLifeBound = charData.playerLifeData.MaxLivesBound;
         
         // SetHearts();
