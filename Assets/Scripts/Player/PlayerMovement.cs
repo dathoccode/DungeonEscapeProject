@@ -45,6 +45,7 @@ public class PlayerMovement : MonoBehaviour
     private float dashTimer = 0f;
     private float dashCoolDownTimer = 0f;
     private bool canMove = true;
+    private bool isWallSliding = false;
     
     private static readonly int animState = Animator.StringToHash("state");
 
@@ -139,11 +140,13 @@ public class PlayerMovement : MonoBehaviour
         // }
         #endregion
 
+        UpdateWallSlideState();
         UpdateAnimationState();
     }
 
     private void FixedUpdate()
     {
+        UpdateWallSlideState();
         Move();
 
         if (isOnWall() && !IsGrounded())
@@ -238,6 +241,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (context.performed)
         {
+            UpdateWallSlideState();
             if (isOnWall() && !IsGrounded())
             {
                 WallJump();
@@ -284,6 +288,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void Jump(float jumpF)
     {
+        isWallSliding = false;
         PlayParticleEffect(jumpEffect);
         AudioManager.Instance.PlaySound(AudioType.characterJump);
         rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpF);
@@ -292,19 +297,39 @@ public class PlayerMovement : MonoBehaviour
     public void ResetJump()
     {
         airJumpCnt = 0;
+        isWallSliding = false;
     }
 
     private void WallJump()
     {
+        bool wallOnRight = isOnRightWall();
+        bool wallOnLeft = isOnLeftWall();
+
         StopCoroutine(DisableMovement(0));
         StartCoroutine(DisableMovement(0.15f));
         
         PlayParticleEffect(jumpEffect);
         AudioManager.Instance.PlaySound(AudioType.characterJump);
+
+        float jumpDirX;
+        if (wallOnRight && !wallOnLeft)
+        {
+            jumpDirX = -wallJumpForce.x;
+            charSprite.flipX = true;
+        }
+        else if (wallOnLeft && !wallOnRight)
+        {
+            jumpDirX = wallJumpForce.x;
+            charSprite.flipX = false;
+        }
+        else
+        {
+            jumpDirX = charSprite.flipX ? wallJumpForce.x : -wallJumpForce.x;
+            Flip();
+        }
         
-        rb.linearVelocity = charSprite.flipX ? new Vector2(wallJumpForce.x, wallJumpForce.y) : new Vector2(-wallJumpForce.x, wallJumpForce.y);
-        
-        Flip();
+        rb.linearVelocity = new Vector2(jumpDirX, wallJumpForce.y);
+        isWallSliding = false;
     }
 
     private void WallSlide()
@@ -372,12 +397,50 @@ public class PlayerMovement : MonoBehaviour
         return Physics2D.BoxCast(bounds.center, bounds.size, 0f, Vector2.down, .1f, groundLayer);
     }
 
+    private void UpdateWallSlideState()
+    {
+        if (!canWallGrab || IsGrounded() || !canMove)
+        {
+            isWallSliding = false;
+            return;
+        }
+
+        bool touchingRight = isOnRightWall();
+        bool touchingLeft = isOnLeftWall();
+
+        if (!touchingRight && !touchingLeft)
+        {
+            isWallSliding = false;
+            return;
+        }
+
+        if (!isWallSliding)
+        {
+            // Muốn bám tường thì người chơi phải hướng di chuyển vào phía tường và không đang bay lên từ cú nhảy
+            bool pushingIntoWall = (touchingRight && dirX > 0.01f) || (touchingLeft && dirX < -0.01f);
+            if (pushingIntoWall && rb.linearVelocity.y <= 0.1f)
+            {
+                isWallSliding = true;
+                if (touchingRight)
+                    charSprite.flipX = false;
+                else if (touchingLeft)
+                    charSprite.flipX = true;
+            }
+        }
+        else
+        {
+            // Khi đang bám tường: nếu chủ động di chuyển ngược hướng tường thì thả bám
+            bool movingAway = (touchingRight && dirX < -0.01f) || (touchingLeft && dirX > 0.01f);
+            if (movingAway)
+            {
+                isWallSliding = false;
+            }
+        }
+    }
+
     private bool isOnWall()
     {
-        if (canWallGrab)
-            return isOnRightWall() || isOnLeftWall();
-        else
-            return false;
+        return isWallSliding;
     }
     
     private bool isOnRightWall()
