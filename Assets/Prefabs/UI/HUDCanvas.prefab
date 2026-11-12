@@ -1097,6 +1097,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 5458246250589466888, guid: 8adfd4b2029e0954e87e52fc3897fc2a, type: 3}
+      propertyPath: deadzone
+      value: 0.7
+      objectReference: {fileID: 0}
     - target: {fileID: 8575846660023476936, guid: 8adfd4b2029e0954e87e52fc3897fc2a, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5

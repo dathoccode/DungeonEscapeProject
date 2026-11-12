@@ -1,8 +1,12 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem.Layouts;
+using UnityEngine.InputSystem.OnScreen;
 
-public class VirtualJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler, IPointerUpHandler
+public class VirtualJoystick : OnScreenControl, IPointerDownHandler, IDragHandler, IPointerUpHandler
 {
+    private const string FloatingJoystickPrefKey = "FloatingJoystick";
+
     public enum JoystickType
     {
         Fixed,
@@ -19,10 +23,20 @@ public class VirtualJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler,
     [SerializeField, Min(1f)]
     private float maxDistance = 60f;
 
+    [InputControl(layout = "Vector2")]
+    [SerializeField]
+    private string m_ControlPath = "<Gamepad>/leftStick";
+
     [Header("References")]
     [SerializeField] private RectTransform joystickBackground;
     [SerializeField] private RectTransform joystickHandle;
     [SerializeField] private RectTransform touchArea;
+
+    protected override string controlPathInternal
+    {
+        get => m_ControlPath;
+        set => m_ControlPath = value;
+    }
 
     public Vector2 Direction { get; private set; }
 
@@ -32,17 +46,37 @@ public class VirtualJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler,
         set => deadzone = Mathf.Clamp01(value);
     }
 
+    public JoystickType CurrentJoystickType => joystickType;
+
     private int activePointerId = -1;
     private bool isDragging;
-
     private Vector2 fixedBasePosition;
+    private bool isInitialized;
 
     private void Awake()
     {
-        fixedBasePosition = joystickBackground.anchoredPosition;
+        if (joystickBackground != null)
+        {
+            fixedBasePosition = joystickBackground.anchoredPosition;
+        }
 
-        SetJoystickType(JoystickType.Fixed);
+        LoadSettings();
+        isInitialized = true;
+    }
+
+    protected override void OnEnable()
+    {
+        base.OnEnable();
+        if (isInitialized)
+        {
+            LoadSettings();
+        }
+    }
+
+    protected override void OnDisable()
+    {
         ResetJoystick();
+        base.OnDisable();
     }
 
     private void Update()
@@ -50,6 +84,46 @@ public class VirtualJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler,
         if (debugJoystickType != joystickType)
         {
             SetJoystickType(debugJoystickType);
+        }
+    }
+
+    public void LoadSettings()
+    {
+        bool isFloating = PlayerPrefs.GetInt(FloatingJoystickPrefKey, 0) == 1;
+        SetJoystickType(isFloating ? JoystickType.Floating : JoystickType.Fixed);
+    }
+
+    public void SetJoystickType(JoystickType newJoystickType)
+    {
+        joystickType = newJoystickType;
+        debugJoystickType = newJoystickType;
+
+        ResetJoystick();
+
+        if (touchArea == null || joystickBackground == null) return;
+
+        if (joystickType == JoystickType.Floating)
+        {
+            joystickBackground.gameObject.SetActive(false);
+
+            // In Floating mode, touch area covers the left half of the screen
+            touchArea.anchorMin = new Vector2(0f, 0f);
+            touchArea.anchorMax = new Vector2(0.5f, 1f);
+            touchArea.offsetMin = Vector2.zero;
+            touchArea.offsetMax = Vector2.zero;
+            touchArea.pivot = new Vector2(0.5f, 0.5f);
+        }
+        else
+        {
+            joystickBackground.anchoredPosition = fixedBasePosition;
+            joystickBackground.gameObject.SetActive(true);
+
+            // In Fixed mode, touch area covers the bottom-left area around the fixed joystick
+            touchArea.anchorMin = joystickBackground.anchorMin;
+            touchArea.anchorMax = joystickBackground.anchorMax;
+            touchArea.pivot = joystickBackground.pivot;
+            touchArea.anchoredPosition = fixedBasePosition;
+            touchArea.sizeDelta = new Vector2(400f, 400f);
         }
     }
 
@@ -67,8 +141,9 @@ public class VirtualJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler,
 
         if (joystickType == JoystickType.Floating)
         {
-            if (RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                touchArea,
+            RectTransform parentRect = joystickBackground.parent as RectTransform;
+            if (parentRect != null && RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                parentRect,
                 eventData.position,
                 eventData.pressEventCamera,
                 out Vector2 localPoint))
@@ -95,18 +170,18 @@ public class VirtualJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler,
             return;
         }
 
-        Vector2 offset = Vector2.ClampMagnitude(
-            localPoint, maxDistance);
+        Vector2 offset = Vector2.ClampMagnitude(localPoint, maxDistance);
+        if (joystickHandle != null)
+            joystickHandle.anchoredPosition = offset;
 
-        joystickHandle.anchoredPosition = offset;
         Vector2 rawDirection = offset / maxDistance;
         Direction = rawDirection.magnitude < deadzone ? Vector2.zero : rawDirection;
+        SendValueToControl(Direction);
     }
 
     public void OnPointerUp(PointerEventData eventData)
     {
-        if (!isDragging ||
-            eventData.pointerId != activePointerId)
+        if (!isDragging || eventData.pointerId != activePointerId)
             return;
 
         ResetJoystick();
@@ -115,53 +190,25 @@ public class VirtualJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler,
     private void ResetJoystick()
     {
         Direction = Vector2.zero;
-        joystickHandle.anchoredPosition = Vector2.zero;
-
-        isDragging = false;
-        activePointerId = -1;
-
-        if (joystickType == JoystickType.Floating)
-        {
-            joystickBackground.gameObject.SetActive(false);
-        }
-        else
-        {
-            joystickBackground.anchoredPosition = fixedBasePosition;
-        }
-    }
-
-    private void OnDisable()
-    {
-        Direction = Vector2.zero;
-        isDragging = false;
-        activePointerId = -1;
+        SendValueToControl(Vector2.zero);
 
         if (joystickHandle != null)
             joystickHandle.anchoredPosition = Vector2.zero;
 
-        if (joystickBackground != null &&
-            joystickType == JoystickType.Floating)
-        {
-            joystickBackground.gameObject.SetActive(false);
-        }
-    }
+        isDragging = false;
+        activePointerId = -1;
 
-    public void SetJoystickType(JoystickType newJoystickType)
-    {
-        ResetJoystick();
-
-        joystickType = newJoystickType;
-        if (joystickType == JoystickType.Floating)
+        if (joystickBackground != null)
         {
-            joystickBackground.gameObject.SetActive(false);
-            touchArea.anchoredPosition = new Vector2(Screen.width / 2, Screen.height / 2);
-            touchArea.sizeDelta = new Vector2(Screen.width, Screen.height);
-        }
-        else
-        {
-            joystickBackground.gameObject.SetActive(true);
-            touchArea.anchoredPosition = new Vector2(300, 300);
-            touchArea.sizeDelta = new Vector2(400, 400);
+            if (joystickType == JoystickType.Floating)
+            {
+                joystickBackground.gameObject.SetActive(false);
+            }
+            else
+            {
+                joystickBackground.anchoredPosition = fixedBasePosition;
+                joystickBackground.gameObject.SetActive(true);
+            }
         }
     }
 }
