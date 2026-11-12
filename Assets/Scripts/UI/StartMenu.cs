@@ -30,6 +30,11 @@ public class StartMenu : MonoBehaviour
 
     public void StartGame()
     {
+        if (PlayerPrefs.GetInt("LifeCount", 3) < 3)
+        {
+            PlayerPrefs.SetInt("LifeCount", 3);
+        }
+
         if(PlayerPrefs.GetInt("LifeCount", 3) > 0)
         {
             LevelManager.Instance.GoToLatestUnlockedLevel();
@@ -53,6 +58,11 @@ public class StartMenu : MonoBehaviour
     
     public void OpenLevelsMenu()
     {
+        if (PlayerPrefs.GetInt("LifeCount", 3) < 3)
+        {
+            PlayerPrefs.SetInt("LifeCount", 3);
+        }
+
         if (PlayerPrefs.GetInt("LifeCount", 3) > 0)
         {
             CloseHomeMenu();

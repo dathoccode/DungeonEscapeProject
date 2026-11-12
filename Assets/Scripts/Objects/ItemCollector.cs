@@ -74,4 +74,10 @@ public class ItemCollector : MonoBehaviour
         PlayerPrefs.Save();
         UpdateCherries();
     }
+
+    public void RefreshCherries()
+    {
+        cherries = PlayerPrefs.GetInt("Foods", cherries);
+        UpdateCherries();
+    }
 }

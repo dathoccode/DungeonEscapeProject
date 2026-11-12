@@ -15,6 +15,7 @@ public class PlayerMovement : MonoBehaviour
     
     [Header("Movement")]
     [SerializeField] private float moveSpeed = 7f;
+    [SerializeField, Range(0f, 1f), Tooltip("Deadzone threshold for joystick movement")] private float joystickDeadzone = 0.25f;
     
     [Header("Dash")]
     [SerializeField, Range(0f, 30f), Tooltip("Set as 0, if player can't dash")] private float dashSpeed = 21f;
@@ -209,9 +210,16 @@ public class PlayerMovement : MonoBehaviour
     //     playerInputActions.UI.Pause.performed += TogglePauseState;
     // }
     
+    public float JoystickDeadzone
+    {
+        get => joystickDeadzone;
+        set => joystickDeadzone = Mathf.Clamp01(value);
+    }
+
     public void ReadHorizontalMovement(InputAction.CallbackContext context)
     {
-        dirX = context.ReadValue<float>();
+        float val = context.ReadValue<float>();
+        dirX = Mathf.Abs(val) < joystickDeadzone ? 0f : val;
     }
     
     public void ReadDash(InputAction.CallbackContext context)
@@ -279,6 +287,11 @@ public class PlayerMovement : MonoBehaviour
         PlayParticleEffect(jumpEffect);
         AudioManager.Instance.PlaySound(AudioType.characterJump);
         rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpF);
+    }
+
+    public void ResetJump()
+    {
+        airJumpCnt = 0;
     }
 
     private void WallJump()

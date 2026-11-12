@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.EventSystems;
 
 public class VirtualJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler, IPointerUpHandler
@@ -13,6 +13,9 @@ public class VirtualJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler,
     [SerializeField] private JoystickType joystickType = JoystickType.Fixed;
     [SerializeField] private JoystickType debugJoystickType = JoystickType.Fixed;
 
+    [SerializeField, Range(0f, 1f), Tooltip("Deadzone threshold before joystick input registers")]
+    private float deadzone = 0.25f;
+
     [SerializeField, Min(1f)]
     private float maxDistance = 60f;
 
@@ -22,6 +25,12 @@ public class VirtualJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler,
     [SerializeField] private RectTransform touchArea;
 
     public Vector2 Direction { get; private set; }
+
+    public float Deadzone
+    {
+        get => deadzone;
+        set => deadzone = Mathf.Clamp01(value);
+    }
 
     private int activePointerId = -1;
     private bool isDragging;
@@ -46,6 +55,11 @@ public class VirtualJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler,
 
     public void OnPointerDown(PointerEventData eventData)
     {
+        if (EventSystem.current != null && EventSystem.current.currentSelectedGameObject != null)
+        {
+            EventSystem.current.SetSelectedGameObject(null);
+        }
+
         if (isDragging) return;
 
         activePointerId = eventData.pointerId;
@@ -85,7 +99,8 @@ public class VirtualJoystick : MonoBehaviour, IPointerDownHandler, IDragHandler,
             localPoint, maxDistance);
 
         joystickHandle.anchoredPosition = offset;
-        Direction = offset / maxDistance;
+        Vector2 rawDirection = offset / maxDistance;
+        Direction = rawDirection.magnitude < deadzone ? Vector2.zero : rawDirection;
     }
 
     public void OnPointerUp(PointerEventData eventData)

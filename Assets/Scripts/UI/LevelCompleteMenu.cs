@@ -1,6 +1,7 @@
 using System;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
@@ -88,6 +89,9 @@ public class LevelCompleteMenu : MonoBehaviour
 
         if (levelCompleteCanvas != null)
             levelCompleteCanvas.enabled = true;
+
+        if (EventSystem.current != null)
+            EventSystem.current.sendNavigationEvents = true;
 
         Time.timeScale = 0f;
 
