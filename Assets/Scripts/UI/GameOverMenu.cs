@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 
 public class GameOverMenu : MonoBehaviour
@@ -7,6 +8,8 @@ public class GameOverMenu : MonoBehaviour
     [SerializeField] private GameObject mainPanel;
     [SerializeField] private GameObject startLevelAgainBtn;
     [SerializeField] private LevelTimer levelTimer;
+    [SerializeField] private PlayerLife playerLife;
+    [SerializeField] private ItemCollector itemCollector;
 
     private void Awake()
     {
@@ -15,12 +18,21 @@ public class GameOverMenu : MonoBehaviour
 
         if (levelTimer == null)
             levelTimer = FindFirstObjectByType<LevelTimer>();
+
+        if (playerLife == null)
+            playerLife = FindFirstObjectByType<PlayerLife>();
+
+        if (itemCollector == null)
+            itemCollector = FindFirstObjectByType<ItemCollector>();
     }
 
     public void OpenGameOverMenu()
     {
         if (levelTimer != null)
             levelTimer.StopTimer();
+
+        if (EventSystem.current != null)
+            EventSystem.current.sendNavigationEvents = true;
 
         gameOverCanvas.enabled = true;
         SetTimeScale(false);
@@ -32,6 +44,12 @@ public class GameOverMenu : MonoBehaviour
     {
         gameOverCanvas.enabled = false;
         SetTimeScale(true);
+
+        if (EventSystem.current != null)
+        {
+            EventSystem.current.sendNavigationEvents = false;
+            EventSystem.current.SetSelectedGameObject(null);
+        }
     }
 
     private void SetStartAgainBtn()
@@ -47,13 +65,29 @@ public class GameOverMenu : MonoBehaviour
     public void Home()
     {
         CloseGameOverMenu();
+        if (EventSystem.current != null)
+            EventSystem.current.sendNavigationEvents = true;
         SceneManager.LoadScene("Scenes/Start Screen");
     }
     
     public void StartAgain()
     {
         CloseGameOverMenu();
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+
+        if (levelTimer != null)
+            levelTimer.ResumeTimer();
+
+        if (itemCollector == null)
+            itemCollector = FindFirstObjectByType<ItemCollector>();
+
+        if (itemCollector != null)
+            itemCollector.RefreshCherries();
+
+        if (playerLife == null)
+            playerLife = FindFirstObjectByType<PlayerLife>();
+
+        if (playerLife != null)
+            playerLife.RespawnFromGameOver();
     }
 
     public void OnExtraLivesMenuOpen()

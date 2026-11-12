@@ -114,7 +114,20 @@ public class PlayerLife : MonoBehaviour
 
     private void UpdateHeartsCountsUI()
     {
-        heartsCount.text = $"{LifeCount}";
+        if (heartsCount != null)
+            heartsCount.text = $"{LifeCount}";
+    }
+
+    public void SyncLivesFromPrefs()
+    {
+        LifeCount = PlayerPrefs.GetInt("LifeCount", 0);
+        UpdateHeartsCountsUI();
+    }
+
+    public void RespawnFromGameOver()
+    {
+        SyncLivesFromPrefs();
+        Respawn();
     }
     
     private void CheckLifeStatus()
@@ -137,6 +150,7 @@ public class PlayerLife : MonoBehaviour
         boxCollider.enabled = true;
         playerMovement.Flip(true);
         rb.bodyType = RigidbodyType2D.Dynamic;
+        rb.linearVelocity = Vector2.zero;
         if (checkpointManager.hasPassedAnyCheckPoints())
         {
             Vector3 pos = checkpointManager.GetLatestCheckPoint().position;

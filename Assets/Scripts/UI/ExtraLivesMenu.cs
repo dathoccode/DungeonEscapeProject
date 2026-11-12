@@ -93,6 +93,14 @@ public class ExtraLivesMenu : MonoBehaviour
         int currFoodCount = PlayerPrefs.GetInt("Foods", 0);
         PlayerPrefs.SetInt("Foods", currFoodCount - Math.Abs(currFoodQty));
         
+        PlayerLife playerLife = FindFirstObjectByType<PlayerLife>();
+        if (playerLife != null)
+            playerLife.SyncLivesFromPrefs();
+
+        ItemCollector itemCollector = FindFirstObjectByType<ItemCollector>();
+        if (itemCollector != null)
+            itemCollector.RefreshCherries();
+
         ResetQty();
         
         UpdateExtraLifeMenuUI();

@@ -32,10 +32,18 @@ public class LevelLoader : MonoBehaviour
                 break;
 
             case LevelStatus.Unlocked:
+                if (PlayerPrefs.GetInt("LifeCount", 3) < 3)
+                {
+                    PlayerPrefs.SetInt("LifeCount", 3);
+                }
                 SceneManager.LoadScene(levelName.ToString());
                 break;
 
             case LevelStatus.Completed:
+                if (PlayerPrefs.GetInt("LifeCount", 3) < 3)
+                {
+                    PlayerPrefs.SetInt("LifeCount", 3);
+                }
                 SceneManager.LoadScene(levelName.ToString());
                 break;
         }

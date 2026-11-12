@@ -176,4 +176,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   animator: {fileID: 2042507213234548713}
   checkpointManager: {fileID: 0}
+  levelTimer: {fileID: 0}
   hudMenu: {fileID: 0}
+  levelCompleteMenu: {fileID: 0}
+  levelCompleteMenuPrefab: {fileID: 4667041472284027237, guid: c5d9f023b4e64a7890123456789abcde, type: 3}

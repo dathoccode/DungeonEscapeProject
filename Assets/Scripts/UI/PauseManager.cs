@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.InputSystem;
 
@@ -19,6 +20,21 @@ public class PauseManager : MonoBehaviour
             playerInput = FindFirstObjectByType<PlayerInput>();
     }
 
+    void Start()
+    {
+        SetGameplayUINavigation(false);
+    }
+
+    private void SetGameplayUINavigation(bool enableNavigation)
+    {
+        if (EventSystem.current == null)
+            return;
+
+        EventSystem.current.sendNavigationEvents = enableNavigation;
+        if (!enableNavigation)
+            EventSystem.current.SetSelectedGameObject(null);
+    }
+
     public void TogglePauseMenu()
     {
         // playerInputActions = inputActions;
@@ -37,6 +53,7 @@ public class PauseManager : MonoBehaviour
     {
         pauseCanvas.enabled = true;
         SetTimeScale(false);
+        SetGameplayUINavigation(true);
         playerInput.SwitchCurrentActionMap("UI");
         // playerInputActions.Player.Disable();
         // playerInputActions.UI.Enable();
@@ -47,21 +64,25 @@ public class PauseManager : MonoBehaviour
         pauseCanvas.enabled = false;
         
         if (resetTimeScale)
+        {
             SetTimeScale(true);
-        
-        playerInput.SwitchCurrentActionMap("Player");
+            SetGameplayUINavigation(false);
+            playerInput.SwitchCurrentActionMap("Player");
+        }
         // playerInputActions.Player.Enable();
         // playerInputActions.UI.Disable();
     }
 
     public void HomeMenu()
     {
+        SetGameplayUINavigation(true);
         SceneManager.LoadScene("Scenes/Start Screen");
         SetTimeScale(true);
     }
 
     public void Restart()
     {
+        SetGameplayUINavigation(false);
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         SetTimeScale(true);
     }
